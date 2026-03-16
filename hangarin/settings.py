@@ -130,6 +130,9 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+# Absolute filesystem path to the directory that will hold static files for production.
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
 STATICFILES_DIRS = [
     BASE_DIR / "static"
 ]
