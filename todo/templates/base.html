@@ -19,9 +19,9 @@
                 <a href="{% url 'dashboard' %}" class="brand-block text-decoration-none">
                     <div class="brand-mark">H</div>
                     <div>
-                        <p class="brand-eyebrow">Workspace</p>
+
                         <h1 class="brand-title">Hangarin</h1>
-                        <p class="brand-subtitle">Task and to-do manager</p>
+                        
                     </div>
                 </a>
 
@@ -46,7 +46,6 @@
                     </div>
                     <div>
                         <p class="profile-name">{% firstof request.user.get_full_name request.user.username "Guest" %}</p>
-                        <p class="profile-role">Focus workspace</p>
                     </div>
                 </div>
 
