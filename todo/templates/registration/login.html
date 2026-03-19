@@ -5,10 +5,6 @@
 <section class="auth-card">
     <div class="auth-card-header">
         <p class="auth-kicker">Hangarin</p>
-        <h1>Sign in to your workspace</h1>
-        <p class="auth-copy">
-            Keep the familiar background, use your email and password, or continue with Google or GitHub.
-        </p>
     </div>
 
     <form method="post" class="auth-form">
@@ -62,12 +58,10 @@
         {% if google_login_enabled %}
             {% provider_login_url "google" process="login" as google_login_url %}
             <a href="{{ google_login_url }}" class="auth-social-button">
-                <span class="auth-social-icon">G</span>
                 <span>Continue with Google</span>
             </a>
         {% else %}
             <div class="auth-social-button auth-social-disabled" aria-disabled="true">
-                <span class="auth-social-icon">G</span>
                 <span>Continue with Google</span>
             </div>
         {% endif %}
@@ -75,12 +69,10 @@
         {% if github_login_enabled %}
             {% provider_login_url "github" process="login" as github_login_url %}
             <a href="{{ github_login_url }}" class="auth-social-button">
-                <span class="auth-social-icon">GH</span>
                 <span>Continue with GitHub</span>
             </a>
         {% else %}
             <div class="auth-social-button auth-social-disabled" aria-disabled="true">
-                <span class="auth-social-icon">GH</span>
                 <span>Continue with GitHub</span>
             </div>
         {% endif %}
