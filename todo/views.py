@@ -7,9 +7,13 @@ from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.urls import reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Count
 
-from .forms import TaskForm
-from .models import Note, Task
+from .forms import TaskForm, SubTaskForm, CategoryForm, PriorityForm, NoteForm
+from .models import Category, Note, Priority, SubTask, Task
 
 
 STATUS_PENDING = "Pending"
@@ -193,3 +197,200 @@ def dashboard(request):
         "category_breakdown": category_breakdown,
     }
     return render(request, "dashboard.html", context)
+
+
+@login_required
+def subtask_list(request):
+    subtasks = SubTask.objects.filter(parent_task__user=request.user).select_related('parent_task').order_by('-created_at')
+    return render(request, "tasks/subtask_list.html", {"subtasks": subtasks, "title": "Sub Tasks", "subtitle": "Track smaller steps of your larger tasks."})
+
+@login_required
+def category_list(request):
+    categories = Category.objects.annotate(tasks_linked=Count('tasks')).order_by('name')
+    return render(request, "tasks/category_list.html", {"items": categories, "title": "Categories", "subtitle": "Your task categorization labels."})
+
+@login_required
+def priority_list(request):
+    priorities = Priority.objects.annotate(tasks_linked=Count('tasks')).order_by('name')
+    return render(request, "tasks/priority_list.html", {"items": priorities, "title": "Priorities", "subtitle": "Your task priority levels."})
+
+@login_required
+def note_list(request):
+    notes = Note.objects.filter(task__user=request.user).select_related('task').order_by('-created_at')
+    return render(request, "tasks/note_list.html", {"notes": notes, "title": "Notes", "subtitle": "Your collected task notes in one place."})
+
+# CRUD CBVs
+
+class TaskUpdateView(LoginRequiredMixin, UpdateView):
+    model = Task
+    form_class = TaskForm
+    template_name = 'tasks/generic_form.html'
+    success_url = reverse_lazy('task_list')
+
+    def get_queryset(self):
+        return super().get_queryset().filter(user=self.request.user)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Edit Task'
+        return context
+
+class SubTaskCreateView(LoginRequiredMixin, CreateView):
+    model = SubTask
+    form_class = SubTaskForm
+    template_name = 'tasks/generic_form.html'
+    success_url = reverse_lazy('subtask_list')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'New Sub Task'
+        return context
+
+class SubTaskUpdateView(LoginRequiredMixin, UpdateView):
+    model = SubTask
+    form_class = SubTaskForm
+    template_name = 'tasks/generic_form.html'
+    success_url = reverse_lazy('subtask_list')
+
+    def get_queryset(self):
+        return super().get_queryset().filter(parent_task__user=self.request.user)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Edit Sub Task'
+        return context
+
+class SubTaskDeleteView(LoginRequiredMixin, DeleteView):
+    model = SubTask
+    template_name = 'tasks/generic_confirm_delete.html'
+    success_url = reverse_lazy('subtask_list')
+
+    def get_queryset(self):
+        return super().get_queryset().filter(parent_task__user=self.request.user)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['object_name'] = 'Sub Task'
+        return context
+
+class CategoryCreateView(LoginRequiredMixin, CreateView):
+    model = Category
+    form_class = CategoryForm
+    template_name = 'tasks/generic_form.html'
+    success_url = reverse_lazy('category_list')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'New Category'
+        return context
+
+class CategoryUpdateView(LoginRequiredMixin, UpdateView):
+    model = Category
+    form_class = CategoryForm
+    template_name = 'tasks/generic_form.html'
+    success_url = reverse_lazy('category_list')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Edit Category'
+        return context
+
+class CategoryDeleteView(LoginRequiredMixin, DeleteView):
+    model = Category
+    template_name = 'tasks/generic_confirm_delete.html'
+    success_url = reverse_lazy('category_list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['object_name'] = 'Category'
+        return context
+
+class PriorityCreateView(LoginRequiredMixin, CreateView):
+    model = Priority
+    form_class = PriorityForm
+    template_name = 'tasks/generic_form.html'
+    success_url = reverse_lazy('priority_list')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'New Priority'
+        return context
+
+class PriorityUpdateView(LoginRequiredMixin, UpdateView):
+    model = Priority
+    form_class = PriorityForm
+    template_name = 'tasks/generic_form.html'
+    success_url = reverse_lazy('priority_list')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Edit Priority'
+        return context
+
+class PriorityDeleteView(LoginRequiredMixin, DeleteView):
+    model = Priority
+    template_name = 'tasks/generic_confirm_delete.html'
+    success_url = reverse_lazy('priority_list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['object_name'] = 'Priority'
+        return context
+
+class NoteCreateView(LoginRequiredMixin, CreateView):
+    model = Note
+    form_class = NoteForm
+    template_name = 'tasks/generic_form.html'
+    success_url = reverse_lazy('note_list')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+        
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'New Note'
+        return context
+
+class NoteUpdateView(LoginRequiredMixin, UpdateView):
+    model = Note
+    form_class = NoteForm
+    template_name = 'tasks/generic_form.html'
+    success_url = reverse_lazy('note_list')
+
+    def get_queryset(self):
+        return super().get_queryset().filter(task__user=self.request.user)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+        
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Edit Note'
+        return context
+
+class NoteDeleteView(LoginRequiredMixin, DeleteView):
+    model = Note
+    template_name = 'tasks/generic_confirm_delete.html'
+    success_url = reverse_lazy('note_list')
+
+    def get_queryset(self):
+        return super().get_queryset().filter(task__user=self.request.user)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['object_name'] = 'Note'
+        return context

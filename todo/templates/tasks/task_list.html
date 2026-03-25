@@ -72,66 +72,70 @@
 </section>
 
 {% if tasks.object_list %}
-    <section class="task-grid">
-        {% for task in tasks %}
-            <article class="surface-card task-card">
-                <div class="task-card-top">
-                    <div>
-                        <h3 class="task-card-title">{{ task.title }}</h3>
-                        <p class="task-card-description mt-2">{{ task.description|default:"No description added yet."|truncatechars:150 }}</p>
-                    </div>
-                    <span class="priority-pill {% if task.is_priority_alert %}priority-alert{% else %}priority-normal{% endif %}">
-                        {{ task.priority.name|title }}
-                    </span>
-                </div>
-
-                <div class="task-card-meta">
-                    <span class="status-pill {% if task.status == 'Completed' %}status-complete{% elif task.status == 'In Progress' %}status-progress{% else %}status-pending{% endif %}">
-                        {{ task.status }}
-                    </span>
-                    <span class="meta-pill">{{ task.category.name }}</span>
-                    <span class="meta-pill">
-                        {% if task.deadline %}
-                            {{ task.deadline|date:"M d, Y" }}
-                        {% else %}
-                            No deadline
-                        {% endif %}
-                    </span>
-                    <span class="meta-pill">{{ task.subtasks.count }} subtasks</span>
-                    <span class="meta-pill">{{ task.notes.count }} notes</span>
-                </div>
-
-                {% if task.preview_notes %}
-                    <div class="note-preview">
-                        {% for note in task.preview_notes %}
-                            <div class="note-preview-item">{{ note.content|truncatechars:95 }}</div>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <div class="note-preview-item">No notes added for this task yet.</div>
-                {% endif %}
-
-                <div class="task-card-actions">
-                    <form action="{% url 'complete_task' task.id %}" method="post">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-outline-soft btn-success-soft w-100" {% if task.status == 'Completed' %}disabled{% endif %}>
-                            {% if task.status == 'Completed' %}Completed{% else %}Mark Complete{% endif %}
-                        </button>
-                    </form>
-
-                    <button
-                        type="button"
-                        class="btn btn-outline-soft btn-danger-soft"
-                        data-bs-toggle="modal"
-                        data-bs-target="#deleteModal"
-                        data-delete-url="{% url 'delete_task' task.id %}"
-                        data-task-title="{{ task.title }}"
-                    >
-                        Delete
-                    </button>
-                </div>
-            </article>
-        {% endfor %}
+    <section class="surface-card p-0 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Title</th>
+                        <th>Status</th>
+                        <th>Category</th>
+                        <th>Priority</th>
+                        <th>Deadline</th>
+                        <th>Updated</th>
+                        <th class="text-end pe-4">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for task in tasks %}
+                    <tr>
+                        <td class="ps-4 fw-semibold">{{ task.title }}</td>
+                        <td>
+                            <span class="status-pill {% if task.status == 'Completed' %}status-complete{% elif task.status == 'In Progress' %}status-progress{% else %}status-pending{% endif %}">
+                                {{ task.status }}
+                            </span>
+                        </td>
+                        <td>{{ task.category.name|default:"None" }}</td>
+                        <td>
+                            <span class="priority-pill {% if task.is_priority_alert %}priority-alert{% else %}priority-normal{% endif %}">
+                                {{ task.priority.name|title|default:"Normal" }}
+                            </span>
+                        </td>
+                        <td>{{ task.deadline|date:"M d, Y"|default:"No deadline" }}</td>
+                        <td class="text-secondary small">{{ task.updated_at|date:"M d, Y" }}</td>
+                        <td class="text-end pe-4">
+                            <form action="{% url 'complete_task' task.id %}" method="post" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-soft btn-success-soft" {% if task.status == 'Completed' %}disabled{% endif %} title="Mark Complete">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check2" viewBox="0 0 16 16">
+                                      <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/>
+                                    </svg>
+                                </button>
+                            </form>
+                            <a href="{% url 'task_update' task.id %}" class="btn btn-sm btn-outline-soft btn-secondary-soft mx-1" title="Edit">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16">
+                                  <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325"/>
+                                </svg>
+                            </a>
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-outline-soft btn-danger-soft"
+                                data-bs-toggle="modal"
+                                data-bs-target="#deleteModal"
+                                data-delete-url="{% url 'delete_task' task.id %}"
+                                data-task-title="{{ task.title }}"
+                                title="Delete"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
+                                  <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .471-.53Zm5.058 0a.5.5 0 0 1 .471.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47ZM8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"/>
+                                </svg>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </section>
 
     <nav class="pagination-wrap" aria-label="Task pagination">

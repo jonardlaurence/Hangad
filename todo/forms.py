@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import Category, Note, Priority, Task
+from .models import Category, Note, Priority, SubTask, Task
 
 
 class TaskForm(forms.ModelForm):
@@ -52,8 +52,49 @@ class NoteForm(forms.ModelForm):
                 attrs={
                     "placeholder": "Enter your note here...",
                     "rows": 3,
-                    "class": "form-control",
+                    "class": "form-control form-control-lg",
                 }
             ),
-            "task": forms.Select(attrs={"class": "form-select"}),
+            "task": forms.Select(attrs={"class": "form-select form-select-lg"}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        if user:
+            self.fields['task'].queryset = Task.objects.filter(user=user)
+
+
+class SubTaskForm(forms.ModelForm):
+    class Meta:
+        model = SubTask
+        fields = ["parent_task", "title", "status"]
+        widgets = {
+            "title": forms.TextInput(attrs={"class": "form-control form-control-lg", "placeholder": "Sub task title"}),
+            "status": forms.Select(attrs={"class": "form-select form-select-lg"}),
+            "parent_task": forms.Select(attrs={"class": "form-select form-select-lg"}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        if user:
+            self.fields['parent_task'].queryset = Task.objects.filter(user=user)
+
+
+class CategoryForm(forms.ModelForm):
+    class Meta:
+        model = Category
+        fields = ["name"]
+        widgets = {
+            "name": forms.TextInput(attrs={"class": "form-control form-control-lg", "placeholder": "Category Name"}),
+        }
+
+
+class PriorityForm(forms.ModelForm):
+    class Meta:
+        model = Priority
+        fields = ["name"]
+        widgets = {
+            "name": forms.TextInput(attrs={"class": "form-control form-control-lg", "placeholder": "Priority Name"}),
         }

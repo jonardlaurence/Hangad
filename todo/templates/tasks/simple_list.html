@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <p class="page-kicker">Workspace</p>
+        <h2>{{ title }}</h2>
+        <p class="page-subtitle">{{ subtitle }}</p>
+    </div>
+</section>
+
+<section class="content-grid" style="grid-template-columns: 1fr;">
+    <article class="surface-card panel-card">
+        <div class="list-card">
+            {% for item in items %}
+                <div class="task-item" style="display: flex; align-items: center;">
+                    <div style="width: 12px; height: 12px; border-radius: 50%; background: var(--brand-500); margin-right: 16px;"></div>
+                    <p class="task-item-title mb-0" style="font-size: 1.1rem;">{{ item.name }}</p>
+                </div>
+            {% empty %}
+                <div class="empty-state">
+                    <h3>No items found</h3>
+                    <p>There are no items populated here yet.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </article>
+</section>
+{% endblock %}
