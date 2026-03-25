@@ -1,5 +1,9 @@
 {% extends 'base.html' %}
 
+{% block search_placeholder %}Search priorities...{% endblock %}
+{% block search_action %}{% url 'priority_list' %}{% endblock %}
+
+
 {% block content %}
 <div class="page-header d-flex justify-content-between align-items-center mb-4">
     <div>

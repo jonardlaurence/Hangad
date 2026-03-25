@@ -202,21 +202,33 @@ def dashboard(request):
 @login_required
 def subtask_list(request):
     subtasks = SubTask.objects.filter(parent_task__user=request.user).select_related('parent_task').order_by('-created_at')
+    q = request.GET.get('q', '').strip()
+    if q:
+        subtasks = subtasks.filter(Q(title__icontains=q) | Q(status__icontains=q) | Q(parent_task__title__icontains=q))
     return render(request, "tasks/subtask_list.html", {"subtasks": subtasks, "title": "Sub Tasks", "subtitle": "Track smaller steps of your larger tasks."})
 
 @login_required
 def category_list(request):
     categories = Category.objects.annotate(tasks_linked=Count('tasks')).order_by('name')
+    q = request.GET.get('q', '').strip()
+    if q:
+        categories = categories.filter(name__icontains=q)
     return render(request, "tasks/category_list.html", {"items": categories, "title": "Categories", "subtitle": "Your task categorization labels."})
 
 @login_required
 def priority_list(request):
     priorities = Priority.objects.annotate(tasks_linked=Count('tasks')).order_by('name')
+    q = request.GET.get('q', '').strip()
+    if q:
+        priorities = priorities.filter(name__icontains=q)
     return render(request, "tasks/priority_list.html", {"items": priorities, "title": "Priorities", "subtitle": "Your task priority levels."})
 
 @login_required
 def note_list(request):
     notes = Note.objects.filter(task__user=request.user).select_related('task').order_by('-created_at')
+    q = request.GET.get('q', '').strip()
+    if q:
+        notes = notes.filter(Q(task__title__icontains=q) | Q(content__icontains=q))
     return render(request, "tasks/note_list.html", {"notes": notes, "title": "Notes", "subtitle": "Your collected task notes in one place."})
 
 # CRUD CBVs

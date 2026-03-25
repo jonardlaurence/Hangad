@@ -1,5 +1,9 @@
 {% extends 'base.html' %}
 
+{% block search_placeholder %}Search tasks by title...{% endblock %}
+{% block search_action %}{% url 'task_list' %}{% endblock %}
+
+
 {% block content %}
 <section class="page-header">
     <div>
@@ -40,17 +44,7 @@
 
 <section class="surface-card filter-card">
     <form method="get" action="{% url 'task_list' %}" class="filter-grid">
-        <div>
-            <label class="form-caption" for="searchTask">Search tasks</label>
-            <input
-                id="searchTask"
-                type="text"
-                name="q"
-                class="form-control form-control-lg"
-                placeholder="Search by title"
-                value="{{ active_filters.q }}"
-            >
-        </div>
+        {% if active_filters.q %}<input type="hidden" name="q" value="{{ active_filters.q }}">{% endif %}
         <div>
             <label class="form-caption" for="statusFilter">Status</label>
             <select id="statusFilter" name="status" class="form-select form-select-lg">

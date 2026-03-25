@@ -1,5 +1,9 @@
 {% extends 'base.html' %}
 
+{% block search_placeholder %}Search notes...{% endblock %}
+{% block search_action %}{% url 'note_list' %}{% endblock %}
+
+
 {% block content %}
 <div class="page-header d-flex justify-content-between align-items-center mb-4">
     <div>

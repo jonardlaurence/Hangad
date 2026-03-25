@@ -123,7 +123,23 @@
         </aside>
 
         <main class="app-main">
-            <div class="page-shell">
+            <!-- Global Top Navigation Bar -->
+            <header class="app-topbar d-flex align-items-center justify-content-between px-4 py-3 border-bottom mb-4 bg-white" style="position: sticky; top: 0; z-index: 1020;">
+                <form method="get" action="{% block search_action %}{% url 'task_list' %}{% endblock %}" class="top-search-form" style="width: 100%; max-width: 600px;">
+                    <div class="d-flex align-items-center surface-card p-1 bg-white" style="border-radius: 100px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+                        <button type="submit" class="btn btn-dark d-flex align-items-center gap-2" style="border-radius: 100px; padding: 8px 24px; font-weight: 600; font-size: 0.95rem;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/></svg>
+                            Search
+                        </button>
+                        <input type="text" name="q" class="form-control border-0 shadow-none bg-transparent ms-2" placeholder="{% block search_placeholder %}Search tasks, priorities, notes...{% endblock %}" value="{{ request.GET.q|default:'' }}">
+                    </div>
+                </form>
+                <div class="topbar-actions">
+                    <!-- Placeholder for future top right elements -->
+                </div>
+            </header>
+
+            <div class="page-shell px-4">
                 {% if messages %}
                     <div class="message-stack">
                         {% for message in messages %}
